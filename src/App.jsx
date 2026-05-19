@@ -1285,7 +1285,7 @@ export default function App() {
               {!campaignReceived ? (
                 <>
                   <p className="board-intro">
-                    Em Auravale, guerras antigas foram substituídas por duelos sobre o
+                    Em Lumiland, guerras antigas foram substituídas por duelos sobre o
                     tabuleiro. Reis não marcham com exércitos — eles movem peças. Cada
                     partida decide destinos, alianças e o futuro do reino.
                   </p>
