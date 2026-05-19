@@ -16,8 +16,8 @@ const XP_BY_DIFFICULTY = {
   Fácil: 100,
   Médio: 300,
   Difícil: 600,
-  Lendário: 1000,
-  Impossível: 2000,
+  Lendário: 1500,
+  Impossível: 3000,
 };
 
 const DIFFICULTY_UNLOCK_LEVEL = {
