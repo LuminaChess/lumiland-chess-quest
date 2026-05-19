@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "./App.css";
+import "./Chessquest.css";
 
 import tavernBg from "./assets/backgrounds/medieval_tavern_with_chess_motifs.png";
 import gambitBg from "./assets/backgrounds/gothic_chess_temple_in_stormy_gloom.png";
@@ -227,6 +227,7 @@ const rawMissions = {
     ["Ganhe com o Botez Gambit: sacrifique a dama.", "Impossível"],
     ["Ganhe com o Dorian’s Gambit.", "Impossível"],
   ],
+
   attacker: [
     ["Ganhe com roques de lados opostos.", "Fácil"],
     ["Jogue h4, h5 e dê mate.", "Fácil"],
@@ -249,6 +250,7 @@ const rawMissions = {
     ["Faça o rei adversário chegar na primeira fileira. Finais não contam.", "Impossível"],
     ["Dê o mate de Philidor.", "Impossível"],
   ],
+
   positional: [
     ["Analise estrategicamente uma partida sua de xadrez.", "Fácil"],
     ["Consiga o par de bispos.", "Fácil"],
@@ -271,6 +273,7 @@ const rawMissions = {
     ["Deixe o adversário em zugzwang.", "Impossível"],
     ["Ganhe sem trocar nenhuma peça.", "Impossível"],
   ],
+
   endgame: [
     ["Ganhe em um final.", "Fácil"],
     ["Ganhe com uma oposição.", "Fácil"],
@@ -293,6 +296,7 @@ const rawMissions = {
     ["Dê mate com todas as peças na posição inicial, tirando peões.", "Impossível"],
     ["Ganhe com mate de dois cavalos.", "Impossível"],
   ],
+
   chaos: [
     ["Ganhe uma partida no xadrez 960.", "Fácil"],
     ["Dê um garfo.", "Fácil"],
@@ -315,6 +319,7 @@ const rawMissions = {
     ["Chegue com o rei na última fileira. Finais não contam.", "Impossível"],
     ["Dê um mate rocando.", "Impossível"],
   ],
+
   blitz: [
     ["Consiga 15 acertos no Puzzle Rush 3 minutos.", "Fácil"],
     ["Ganhe uma partida de blitz sem pendurar uma peça.", "Fácil"],
@@ -405,7 +410,8 @@ function getPlayerStats(totalXp) {
     ? Math.round((xpInsideLevel / xpNeededInsideLevel) * 100)
     : 100;
 
-  const currentRank = [...ranks].reverse().find((rank) => totalXp >= rank.minXp) || ranks[0];
+  const currentRank =
+    [...ranks].reverse().find((rank) => totalXp >= rank.minXp) || ranks[0];
 
   return {
     totalXp,
@@ -493,7 +499,7 @@ function formatCountdown(ms) {
   return `${minutes}:${seconds}`;
 }
 
-export default function App() {
+export default function ChessQuest() {
   const [screen, setScreen] = useState("home");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [scores, setScores] = useState({
