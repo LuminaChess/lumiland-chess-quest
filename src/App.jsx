@@ -1228,7 +1228,7 @@ export default function App() {
                   <span>Mestre da Taverna</span>
                   <p>
                     {!hasStartedBefore
-                      ? "Ah... um novo aventureiro. Neste reino, batalhas não são travadas apenas com espadas, mas também com partidas de xadrez. Seu primeiro quiz é gratuito."
+                      ? "Ah... um novo aventureiro. Neste reino, batalhas não são travadas apenas com espadas, mas também com partidas de xadrez. Descubra a sua classe."
                       : activeClass && !campaignReceived
                       ? `Então é isso... você é um ${result.title}. Se estiver pronto, eu posso te entregar sua campanha.`
                       : activeClass
