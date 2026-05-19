@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "./Chessquest.css";
+import "./App.css";
 
 import tavernBg from "./assets/backgrounds/medieval_tavern_with_chess_motifs.png";
 import gambitBg from "./assets/backgrounds/gothic_chess_temple_in_stormy_gloom.png";
@@ -499,7 +499,18 @@ function formatCountdown(ms) {
   return `${minutes}:${seconds}`;
 }
 
-export default function ChessQuest() {
+function shuffleArray(array) {
+  const copy = [...array];
+
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
+}
+
+export default function App() {
   const [screen, setScreen] = useState("home");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [scores, setScores] = useState({
@@ -539,6 +550,7 @@ export default function ChessQuest() {
   const [nowTick, setNowTick] = useState(Date.now());
 
   const [randomMission, setRandomMission] = useState(null);
+  const [randomMissionBag, setRandomMissionBag] = useState([]);
   const [achievementPopup, setAchievementPopup] = useState(null);
   const [homeNpcOpen, setHomeNpcOpen] = useState(false);
   const [campaignGuideOpen, setCampaignGuideOpen] = useState(false);
@@ -803,6 +815,7 @@ export default function ChessQuest() {
     }
 
     setRandomMission(null);
+    setRandomMissionBag([]);
     startQuiz(1);
   }
 
@@ -828,6 +841,9 @@ export default function ChessQuest() {
       revealClass(winner);
       saveActiveClass(winner);
 
+      setRandomMission(null);
+      setRandomMissionBag([]);
+
       setScreen("result");
     } else {
       setCurrentQuestion(currentQuestion + 1);
@@ -848,6 +864,7 @@ export default function ChessQuest() {
 
     saveActiveClass(classKey);
     setRandomMission(null);
+    setRandomMissionBag([]);
     setScreen("missions");
   }
 
@@ -858,6 +875,7 @@ export default function ChessQuest() {
     revealClass(classKey);
     saveActiveClass(classKey);
     setRandomMission(null);
+    setRandomMissionBag([]);
 
     setAchievementPopup({
       mission: `${archetypes[classKey].title} desbloqueado!`,
@@ -912,6 +930,7 @@ export default function ChessQuest() {
 
     setActiveClass(null);
     setRandomMission(null);
+    setRandomMissionBag([]);
 
     setAchievementPopup({
       mission: "Campanha anulada. Você ganhou 1 gema para refazer o quiz.",
@@ -968,6 +987,8 @@ export default function ChessQuest() {
       updateSelectedQuest(campaignKey, null);
     }
 
+    setRandomMissionBag([]);
+
     setAchievementPopup({
       mission: mission.text,
       detail: `+${mission.xp} XP`,
@@ -1006,30 +1027,66 @@ export default function ChessQuest() {
   }
 
   function generateRandomMission() {
-    const fallbackCurrentClassPool = unlockedMissions.map((mission) => ({
+    const classKeys = Array.from(new Set([...revealedClasses, activeClass].filter(Boolean)));
+
+    const fullUnlockedPool = classKeys.flatMap((classKey) => {
+      const classProgress = getClassProgress(classKey, progressByClass);
+      const unlockedLevel = classProgress.level.level;
+
+      return buildMissions(classKey)
+        .filter((mission) => mission.unlockLevel <= unlockedLevel)
+        .map((mission) => ({
+          ...mission,
+          classKey,
+          classTitle: archetypes[classKey].title,
+          campaignName: archetypes[classKey].campaignName,
+        }));
+    });
+
+    const fallbackPool = unlockedMissions.map((mission) => ({
       ...mission,
       classKey: campaignKey,
       classTitle: result?.title || "Classe atual",
       campaignName: result?.campaignName || "Campanha atual",
     }));
 
-    const basePool =
-      unlockedRandomMissions.length > 0 ? unlockedRandomMissions : fallbackCurrentClassPool;
-
-    const incompletePool = basePool.filter((mission) => {
-      const missionProgress = progressByClass[mission.classKey] || {};
-      return !missionProgress[mission.id];
-    });
-
-    const pool = incompletePool.length > 0 ? incompletePool : basePool;
+    const pool = fullUnlockedPool.length > 0 ? fullUnlockedPool : fallbackPool;
 
     if (pool.length === 0) {
-      setRandomMission(null);
+      setAchievementPopup({
+        mission: "Nenhuma missão disponível.",
+        detail: "Comece uma campanha primeiro.",
+      });
+
+      setTimeout(() => {
+        setAchievementPopup(null);
+      }, 3000);
+
       return;
     }
 
-    const mission = pool[Math.floor(Math.random() * pool.length)];
-    setRandomMission(mission);
+    const poolIds = new Set(pool.map((mission) => `${mission.classKey}-${mission.id}`));
+
+    let bag = randomMissionBag.filter((mission) =>
+      poolIds.has(`${mission.classKey}-${mission.id}`)
+    );
+
+    if (bag.length === 0) {
+      bag = shuffleArray(pool);
+
+      if (
+        randomMission &&
+        bag.length > 1 &&
+        `${bag[0].classKey}-${bag[0].id}` === `${randomMission.classKey}-${randomMission.id}`
+      ) {
+        [bag[0], bag[1]] = [bag[1], bag[0]];
+      }
+    }
+
+    const [nextMission, ...remainingBag] = bag;
+
+    setRandomMission(nextMission);
+    setRandomMissionBag(remainingBag);
   }
 
   function resetCurrentCampaign() {
@@ -1048,6 +1105,9 @@ export default function ChessQuest() {
 
     writeJson("chessQuestProgressByClass", updatedProgressByClass);
     writeJson("chessQuestSelectedQuestByClass", updatedSelectedQuestByClass);
+
+    setRandomMission(null);
+    setRandomMissionBag([]);
   }
 
   function resetEverything() {
@@ -1072,6 +1132,7 @@ export default function ChessQuest() {
     setSelectedQuestByClass({});
     setCampaignReceived(false);
     setRandomMission(null);
+    setRandomMissionBag([]);
     setAchievementPopup(null);
     setHomeNpcOpen(false);
     setCampaignGuideOpen(false);
@@ -1882,6 +1943,7 @@ export default function ChessQuest() {
           <h2>Desafio aleatório</h2>
           <p>
             O sorteio usa todos os desafios que você já desbloqueou em todas as classes reveladas.
+            Ele embaralha a pool inteira e não repete missão até terminar a sacola.
           </p>
 
           <div className="random-box">
