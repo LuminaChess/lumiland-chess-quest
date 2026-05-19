@@ -1223,17 +1223,17 @@ export default function App() {
                 <span className="npc-click-label">Falar</span>
               </button>
 
-              {(homeNpcOpen || !hasStartedBefore) && (
+              {homeNpcOpen && (
                 <div className="npc-dialogue">
                   <span>Mestre da Taverna</span>
                   <p>
                     {!hasStartedBefore
-                      ? "Ah... um novo aventureiro. Seu primeiro quiz é gratuito. Depois disso, toda nova avaliação custa 1 gema."
+                      ? "Ah... um novo aventureiro. Neste reino, batalhas não são travadas apenas com espadas, mas também com partidas de xadrez. Seu primeiro quiz é gratuito."
                       : activeClass && !campaignReceived
-                      ? `Sua classe foi revelada: ${result.title}. Agora aceite sua campanha para abrir a guilda.`
+                      ? `Então é isso... você é um ${result.title}. Se estiver pronto, eu posso te entregar sua campanha.`
                       : activeClass
-                      ? `Vejo que voltou, ${result.title}. A guilda já tem novas missões para você.`
-                      : "Você anulou sua campanha. Use 1 gema para pedir uma nova avaliação."}
+                      ? `Vejo que voltou, ${result.title}. A taverna ainda guarda missões para você.`
+                      : "Você está sem campanha ativa. Se quiser um novo destino, será preciso gastar 1 gema para refazer o quiz."}
                   </p>
 
                   {!hasStartedBefore ? (
@@ -1243,6 +1243,13 @@ export default function App() {
                   ) : activeClass && !campaignReceived ? (
                     <button className="dialogue-action" onClick={receiveCampaign}>
                       Receber Campanha
+                    </button>
+                  ) : activeClass ? (
+                    <button
+                      className="dialogue-action"
+                      onClick={() => setScreen("missions")}
+                    >
+                      Abrir Missões
                     </button>
                   ) : (
                     <button
@@ -1265,79 +1272,99 @@ export default function App() {
 
               <div className="board-heading">
                 <div>
-                  <span className="board-kicker">Beta 3.0 • Taverna RPG</span>
-                  <h1>Sua campanha começa na taverna.</h1>
+                  <span className="board-kicker">Beta 3.0 • Reino do Tabuleiro</span>
+                  <h1>
+                    {campaignReceived && activeClass
+                      ? "Sua jornada já começou."
+                      : "O reino chama por um novo enxadrista."}
+                  </h1>
                 </div>
                 <div className="board-emblem">♜</div>
               </div>
 
-              <p className="board-intro">
-                Escolha uma quest antes da partida, evolua sua classe e transforme cada jogo
-                em uma missão de campanha.
-              </p>
-
-              <div className="parchment-card main-parchment">
-                <span>Próxima ação</span>
-                <strong>
-                  {!hasStartedBefore
-                    ? "Descobrir sua primeira classe"
-                    : isOutOfLives && campaignReceived
-                    ? "Recupere uma vida antes de voltar a jogar"
-                    : activeClass && !campaignReceived
-                    ? "Receber sua campanha"
-                    : selectedQuest
-                    ? selectedQuest.text
-                    : activeClass
-                    ? "Escolher uma missão no quadro"
-                    : "Refazer o quiz com uma gema"}
-                </strong>
-                <p>
-                  {!hasStartedBefore
-                    ? "O primeiro quiz é gratuito. Depois disso, novas avaliações custam 1 gema."
-                    : isOutOfLives && campaignReceived
-                    ? `Você está sem vidas. Próxima vida em ${formatCountdown(timeToNextLife)}.`
-                    : activeClass && !campaignReceived
-                    ? "Clique em Receber Campanha para liberar as abas e começar sua jornada."
-                    : selectedQuest
-                    ? `Quest ativa • ${selectedQuest.difficulty} • ${selectedQuest.xp} XP`
-                    : activeClass
-                    ? "Entre em Missões, selecione uma quest e jogue a partida valendo."
-                    : "Você está sem campanha ativa. Use 1 gema para fazer o quiz novamente."}
-                </p>
-              </div>
-
-              <div className="board-actions">
-                {!hasStartedBefore ? (
-                  <button className="primary-button" onClick={startFirstQuiz}>
-                    Começar Quiz Grátis
-                  </button>
-                ) : activeClass && !campaignReceived ? (
-                  <button className="primary-button" onClick={receiveCampaign}>
-                    Receber Campanha
-                  </button>
-                ) : selectedQuest ? (
-                  <button className="primary-button" onClick={() => setScreen("missions")}>
-                    Ver Quest Ativa
-                  </button>
-                ) : activeClass ? (
-                  <button className="primary-button" onClick={() => setScreen("missions")}>
-                    Abrir Quadro de Missões
-                  </button>
-                ) : (
-                  <button className="primary-button" onClick={startRerollQuiz} disabled={gems <= 0}>
-                    Refazer Quiz — 1 Gema
-                  </button>
-                )}
-
-                {campaignReceived && (
-                  <button className="secondary-button" onClick={() => setScreen("classes")}>
-                    Galeria de Classes
-                  </button>
-                )}
-              </div>
-
-              {campaignReceived && (
+              {!campaignReceived ? (
                 <>
+                  <p className="board-intro">
+                    Em Auravale, guerras antigas foram substituídas por duelos sobre o
+                    tabuleiro. Reis não marcham com exércitos — eles movem peças. Cada
+                    partida decide destinos, alianças e o futuro do reino.
+                  </p>
+
+                  <div className="parchment-card">
+                    <span>Crônicas da Taverna</span>
+                    <strong>
+                      Dizem que todo grande mestre começou aqui, entre velas, madeira
+                      antiga e o som das peças tocando o tabuleiro.
+                    </strong>
+                    <p>
+                      A Taverna do Mestre é o ponto de encontro dos aventureiros do
+                      reino. Alguns chegam em busca de glória. Outros, por redenção.
+                      Todos recebem uma campanha diferente — moldada pelo seu estilo no
+                      xadrez. Para descobrir a sua, clique no Mestre da Taverna à
+                      esquerda e aceite o chamado.
+                    </p>
+                  </div>
+
+                  <div className="home-progress-strip">
+                    <div className="progress-top">
+                      <span>Primeiro passo</span>
+                      <strong>Começo da Jornada</strong>
+                    </div>
+
+                    <div className="progress-bar">
+                      <div style={{ width: "12%" }}></div>
+                    </div>
+
+                    <div className="home-progress-meta">
+                      <span>Clique no Mestre da Taverna</span>
+                      <span>Converse com ele</span>
+                      <span>Descubra sua classe</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="board-intro">
+                    Sua campanha já está em andamento. Escolha quests, evolua sua classe
+                    e transforme cada partida em um capítulo da sua história no reino.
+                  </p>
+
+                  <div className="parchment-card main-parchment">
+                    <span>Próxima ação</span>
+                    <strong>
+                      {isOutOfLives
+                        ? "Recupere uma vida antes de voltar ao tabuleiro"
+                        : selectedQuest
+                        ? selectedQuest.text
+                        : "Escolher uma missão no quadro"}
+                    </strong>
+                    <p>
+                      {isOutOfLives
+                        ? `Você está sem vidas. Próxima vida em ${formatCountdown(
+                            timeToNextLife
+                          )}.`
+                        : selectedQuest
+                        ? `Quest ativa • ${selectedQuest.difficulty} • ${selectedQuest.xp} XP`
+                        : "Entre em Missões, selecione uma quest e jogue sua próxima partida valendo progresso."}
+                    </p>
+                  </div>
+
+                  <div className="board-actions">
+                    <button
+                      className="primary-button"
+                      onClick={() => setScreen("missions")}
+                    >
+                      Abrir Quadro de Missões
+                    </button>
+
+                    <button
+                      className="secondary-button"
+                      onClick={() => setScreen("classes")}
+                    >
+                      Galeria de Classes
+                    </button>
+                  </div>
+
                   <div className="home-hud-grid">
                     <div className="hud-tile lives-tile">
                       <span>Vidas</span>
